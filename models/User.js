@@ -1,4 +1,8 @@
 const mongoose=require('mongoose');
+const bcrypt=require('bcryptjs');
+const { JsonWebTokenError } = require('jsonwebtoken');
+const jwt =require('jsonwebtoken');
+
 const userSchema= new mongoose.Schema({
     name:{type:String,
     required:[true,'please provide name'],
@@ -16,7 +20,17 @@ minlength:8
 }
 
 })
-//xZXx
+//mongoose middleware set for password incryption
 
+userSchema.pre('save',async function(next){
+    const salt= await bcrypt.genSalt(10);
+    this.password=await bcrypt.hash(this.password,salt);
+    next();
+})
+
+// Mongoose instence  methods creation
+userSchema.methods.createJwt= function(){
+    return jwt.sign({userId:this._id,name:this.name},process.env.JWTKEY,{expiresIn:'2d'});
+}
 
 module.exports= mongoose.model('User',userSchema);
