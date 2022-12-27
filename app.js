@@ -4,6 +4,7 @@ const app=express();
 const dotenv=require("dotenv");
 const auth=require("./routes/auth");
 const jobs=require('./routes/jobs');
+const authenticationMiddleware=require('./middleware/authentication');
 dotenv.config({path:"./.env"});
 let port=process.env.PORT;
 
@@ -13,7 +14,7 @@ app.use(express.urlencoded({extended:false}));
 // Routes
 
 app.use('/api/v1',auth);
-app.use('./api/v1',jobs);
+app.use('/api/v1',authenticationMiddleware,jobs);
 
 // DB
 mongoose.set('strictQuery', false);

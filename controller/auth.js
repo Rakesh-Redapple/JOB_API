@@ -26,7 +26,26 @@ if(!name || !email || !password){
 }
 
 const login= async(req,res)=>{
-    res.status(200).json({mag:'user login done'});
+    try{
+        const {email,password}=req.body;
+        if(!email || !password){
+            return res.status(StatusCodes.BAD_REQUEST).json({Status:'false',msg:'please insert email and password'})
+        }
+        const user= await User.findOne({email});
+        console.log(user);
+        // Compare password
+        if(!user){
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({msg:'user does not exit'});
+        }
+        const isPasswordCorrect= await user.comparePassword(password);
+        if(!isPasswordCorrect){
+            return res.status(StatusCodes.OK).json({msg:'invalid credintial'});
+        }
+        const token= user.createJwt();
+        res.status(StatusCodes.OK).json({user:{name:user.name},token});
+    }catch(error){
+        console.log(error);
+    }
 }
 
 

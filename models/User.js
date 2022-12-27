@@ -20,7 +20,7 @@ minlength:8
 }
 
 })
-//mongoose middleware set for password incryption
+//mongoose middleware set for password incryption or hooks(pre,post)
 
 userSchema.pre('save',async function(next){
     const salt= await bcrypt.genSalt(10);
@@ -32,5 +32,11 @@ userSchema.pre('save',async function(next){
 userSchema.methods.createJwt= function(){
     return jwt.sign({userId:this._id,name:this.name},process.env.JWTKEY,{expiresIn:'2d'});
 }
+userSchema.methods.comparePassword= async function(candidatePassword){
+const isMatch= await bcrypt.compare(candidatePassword,this.password);
+return isMatch
+}
+
+
 
 module.exports= mongoose.model('User',userSchema);
